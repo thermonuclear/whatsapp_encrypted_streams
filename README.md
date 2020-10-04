@@ -1,7 +1,7 @@
 # PSR-7 Stream Whatsapp Encryption Decorators
 
-Декораторы для [PSR-7 потоков](https://github.com/php-fig/http-message/blob/14b9b813c5e36af4498ef38ef97938bf7090fd52
-/src/StreamInterface.php), которые зашифровывают и расшифровывают их по алгоритмам, используемым WhatsApp.
+Декораторы для [PSR-7 потоков](https://github.com/php-fig/http-message/blob/14b9b813c5e36af4498ef38ef97938bf7090fd52/src/StreamInterface.php), 
+которые зашифровывают и расшифровывают их по алгоритмам, используемым WhatsApp.
 
 ## Алгоритм шифрования
 
