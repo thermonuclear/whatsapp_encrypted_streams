@@ -47,12 +47,17 @@ HKDF позволяет указывать информационные стро
 ## Usage examples
 
 ```php
-use GuzzleHttp\Psr7\Stream;
+include_once './vendor/autoload.php';
+
+use GuzzleHttp\Psr7\Utils;
 use Thermonuclear\WhatsappCipher\DecryptStream;
 use Thermonuclear\WhatsappCipher\EncryptStream;
 
-$stream = new Stream(fopen('./samples/AUDIO.original', 'r+'));
-(new EncryptStream($stream, 'AUDIO', file_get_contents('./samples/AUDIO.key')))->createEncryptedFile('./samples/enc');
+$stream = Utils::streamFor('some test text');
+$encryptedData = (new EncryptStream($stream, 'AUDIO', file_get_contents('./samples/AUDIO.key')))->read(1024);
+echo "$encryptedData\n";
 
-$stream = new Stream(fopen('./samples/enc', 'r+'));
-(new DecryptStream($stream, 'AUDIO', file_get_contents('./samples/AUDIO.key')))->createDecryptedFile('./samples/dec');
+$stream = Utils::streamFor($encryptedData);
+$decryptedData = (new DecryptStream($stream, 'AUDIO', file_get_contents('./samples/AUDIO.key')))->read(strlen($encryptedData));
+echo "$decryptedData\n";
+

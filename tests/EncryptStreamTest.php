@@ -24,16 +24,34 @@ class EncryptStreamTest extends TestCase
         $this->assertInstanceOf('Psr\Http\Message\StreamInterface', $prop->getValue($encStream));
     }
 
-    public function testCreateEncryptedFile()
+    public function testRead()
     {
-        $path = 'enc';
-        $stream = Utils::streamFor('some test data for stream');
-        $encStream = new EncryptStream($stream, 'AUDIO');
-        $encStream->createEncryptedFile($path);
+        $originalText = 'some test data for stream';
+        $mediaKey = random_bytes(32);
+        $stream = Utils::streamFor($originalText);
+        $encStream = new EncryptStream($stream, 'AUDIO', $mediaKey);
+        $cipherText = $encStream->read(2048);
 
-        $this->assertFileExists($path);
-        $this->assertGreaterThan(0, filesize($path));
+        $ref = new ReflectionClass('Thermonuclear\WhatsappCipher\EncryptStream');
+        $method = $ref->getProperty('method');
+        $method->setAccessible(true);
+        $iv = $ref->getProperty('iv');
+        $iv->setAccessible(true);
+        $cipherKey = $ref->getProperty('cipherKey');
+        $cipherKey->setAccessible(true);
 
-        unlink($path);
+        $cipherTextTest = openssl_encrypt(
+            $originalText,
+            $method->getValue($encStream),
+            $cipherKey->getValue($encStream),
+            OPENSSL_RAW_DATA,
+            $iv->getValue($encStream)
+        );
+
+        $getMac = $ref->getMethod('getMac');
+        $getMac->setAccessible(true);
+        $mac = $getMac->invoke($encStream, $cipherTextTest);
+
+        $this->assertSame($cipherTextTest.$mac, $cipherText);
     }
 }

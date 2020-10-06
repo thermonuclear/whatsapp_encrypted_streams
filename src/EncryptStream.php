@@ -24,14 +24,15 @@ class EncryptStream implements StreamInterface
     }
 
     /**
-     * Create encrypted file
-     * @param  string  $path  file path for save encrypted stream
+     * Create encrypted data
+     * @param  int  $length  Read up to $length bytes from the object
+     * @return string
      */
-    public function createEncryptedFile(string $path): void
+    public function read($length): string
     {
-        $originalText = $this->stream->getContents();
+        $originalText = $this->stream->read($length);
         $cipherText = openssl_encrypt($originalText, $this->method, $this->cipherKey, OPENSSL_RAW_DATA, $this->iv);
 
-        file_put_contents($path, $cipherText.$this->getMac($cipherText));
+        return $cipherText.$this->getMac($cipherText);
     }
 }

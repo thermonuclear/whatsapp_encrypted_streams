@@ -25,25 +25,24 @@ class DecryptStream implements StreamInterface
     }
 
     /**
-     * Create decrypted file
-     * @param  string  $path  file path for save decrypted stream
-     * @throws Exception
+     * Create decrypted data
+     * @param  int  $length  Read up to $length bytes from the object
+     * @return string
      */
-    public function createDecryptedFile(string $path): void
+    public function read($length): string
     {
-        $cipherTextMac = $this->stream->getContents();
+        $cipherTextMac = $this->stream->read($length);
         $cipherText = substr($cipherTextMac, 0, -$this->macSizeInFile);
 
         $this->checkMacKey($cipherTextMac, $cipherText);
 
-        $originalText = openssl_decrypt($cipherText, $this->method, $this->cipherKey, OPENSSL_RAW_DATA, $this->iv);
-        file_put_contents($path, $originalText);
+        return openssl_decrypt($cipherText, $this->method, $this->cipherKey, OPENSSL_RAW_DATA, $this->iv);
     }
 
     /**
-     * Check macKey from file sign
-     * @param  string  $cipherTextMac  file with mac sign
-     * @param  string  $cipherText  file without mac sign
+     * Check macKey from data sign
+     * @param  string  $cipherTextMac  data with mac sign
+     * @param  string  $cipherText  data without mac sign
      * @throws Exception
      */
     private function checkMacKey(string $cipherTextMac, string $cipherText): void

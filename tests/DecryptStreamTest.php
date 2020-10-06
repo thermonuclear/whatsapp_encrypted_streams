@@ -24,23 +24,17 @@ class DecryptStreamTest extends TestCase
         $this->assertInstanceOf('Psr\Http\Message\StreamInterface', $prop->getValue($encStream));
     }
 
-    public function testCreateDecryptedFile()
+    public function testRead()
     {
-        $pathEnc = 'enc';
-        $stream = Utils::streamFor('some test data for stream');
-        $encStream = new EncryptStream($stream, 'AUDIO');
-        $encStream->createEncryptedFile($pathEnc);
-        $mediaKey = $encStream->getMediaKey();
+        $originalText = 'some test data for stream';
+        $mediaKey = random_bytes(32);
 
-        $stream = Utils::streamFor(fopen($pathEnc, 'r+'));
-        $encStream = new DecryptStream($stream, 'AUDIO', $mediaKey);
-        $path = 'dec';
-        $encStream->createDecryptedFile($path);
+        $encStream = new EncryptStream(Utils::streamFor($originalText), 'AUDIO', $mediaKey);
+        $cipherText = $encStream->read(2048);
 
-        $this->assertFileExists($path);
-        $this->assertGreaterThan(0, filesize($path));
+        $decStream = new DecryptStream(Utils::streamFor($cipherText), 'AUDIO', $mediaKey);
+        $decText = $decStream->read(2048);
 
-        unlink($pathEnc);
-        unlink($path);
+        $this->assertSame($decText, $originalText);
     }
 }
